@@ -13,20 +13,24 @@ class HiveService {
     
     await Hive.openBox('time');
 
+    //first start
     if (Hive.box('time').isEmpty) {
       DateTime now = DateTime.now();
       DateTime date = DateTime(now.year, now.month, now.day);
 
       Hive.box('time').put('wasAnApiRequestToday', false);
       Hive.box('time').put('dateLastApiRequest', date);
-    } 
+    }
+    // если не первый старт
     else {
       DateTime dateLastApiRequest = Hive.box('time').get('dateLastApiRequest');
       DateTime now = DateTime.now();
       DateTime date = DateTime(now.year, now.month, now.day);
 
+      //если сегодня не ещё обновлялись
       if (dateLastApiRequest.isBefore(date)) {
-        Hive.box('time').put('wasAnApiRequestToday', false);
+
+       // Hive.box('time').put('wasAnApiRequestToday', false);
       }
     }
 

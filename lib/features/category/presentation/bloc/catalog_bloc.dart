@@ -55,10 +55,16 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
 
       String strUtf8 = utf8.decode(data.codeUnits);
       Map dataProduct = json.decode(strUtf8);
+      List receivedIDs = [];
+      List receivedImg = [];
+      List receivedClorsDoor = [];
+      List receivedIdClorsDoor = [];
 
       if(dataProduct['successful']) {
         for (var i = 0; i < dataProduct['Products'].length; i++) {
           for (var e = 0; e < dataProduct['Products'][i]['list'].length; e++){
+            print('new Product');
+
             for (var j = 0; j < dataProduct['Products'][i]['list'][e]['img'].length; j++) {
               try {
                 var byte = await getImg(dataProduct['Products'][i]['list'][e]['img'][j]);
@@ -69,15 +75,49 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
             }
 
             for (var colorIndex = 0; colorIndex < dataProduct['Products'][i]['list'][e]['colorsDoor'].length; colorIndex++) {
-              try {
-                var byte = await getImg(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['imgSrc']);
-                dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['imgSrc'] = byte;
-              } catch (e) {
-                Exception('Exception (imgSrc): $e');
+              if (receivedIdClorsDoor.contains(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['id'])) {
+                for (var y = 0; y < receivedClorsDoor.length; y++) {
+                  if (receivedClorsDoor[y]['id'] == dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['id']) {
+                    dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['imgSrc'] = receivedClorsDoor[y]['imgSrc'];
+                    print('pass color door');
+                  }
+                }
+
+              } else {
+                try {
+                  var byte = await getImg(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['imgSrc']);
+                  dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['imgSrc'] = byte;
+                } catch (e) {
+                  Exception('Exception (imgSrc): $e');
+                }
+                print('add color door');
+                receivedClorsDoor.add(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]);
+                receivedIdClorsDoor.add(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['id']);
               }
 
               for (var glassIndex = 0; glassIndex < dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'].length; glassIndex++) {
                 var byte;
+
+                if(receivedIDs.contains(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['id'])) {
+                  for (var y = 0; y < receivedImg.length; y++) {
+                    if (receivedImg[y]['id'] == dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['id']) {
+                      dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc'] = receivedImg[y]['imgSrc'];
+                    }
+                  }
+                  print('pass');
+
+                } else {
+                  // print(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc']);
+                  try {
+                    byte = await getImg(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc']);
+                    dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc'] = byte;
+                  } catch (e) {
+                    Exception('Exception (colorGlass imgSrc): $e');
+                  }
+
+                  receivedImg.add(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]);
+                  receivedIDs.add(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['id']);
+                }
                 
                 try {
                   byte = await getImg(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgFullDoor']);
@@ -86,15 +126,15 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
                   Exception('Exception (imgFullDoor): $e');
                 }
 
-                try {
-                  byte = await getImg(dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc']);
-                  dataProduct['Products'][i]['list'][e]['colorsDoor'][colorIndex]['colorGlass'][glassIndex]['imgSrc'] = byte;
-                } catch (e) {
-                  Exception('Exception (colorGlass imgSrc): $e');
-                }
+                print('end colorGlass');
               }
+              print('end colorsDoor');
             }
+            print('end Product');
           }
+
+          print(receivedIdClorsDoor.length);
+          print(receivedIDs.length);
 
           HiveService.addProducts(
             {
@@ -111,14 +151,16 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
     
     var allCategories = HiveService.getAllCategories();
 
+    // если всё пусто
     if(allCategories.isEmpty) {
       try {
         final result = await InternetAddress.lookup('google.com');
         
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           await setCatalog();
-          await setProduct();
+          // await setProduct();
 
+          // обновились
           HiveService.changeBoxTime(true);
 
           return emit(state.copyWith(
@@ -135,6 +177,7 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
           loadingCategories: false
         ));
       }
+      //если категория не пустая
     } else {
       List timeBox = HiveService.getBoxTime();
       TimeOfDay now = TimeOfDay.now();
@@ -142,7 +185,9 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
 
       print(timeBox);
 
-      if(!timeBox[1] && nowInMinutes >= 600) {
+      //если сегдня не обновлялись и если после 6 утра
+      // if(!timeBox[1] && nowInMinutes >= 600) {
+      if(!timeBox[1]) {
         print('get new data');
 
         HiveService.clearCategories();
@@ -154,7 +199,7 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
         ));
 
         await setCatalog();
-        await setProduct();
+        // await setProduct();
 
         HiveService.changeBoxTime(true);
 

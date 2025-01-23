@@ -5,6 +5,8 @@ import 'package:xc/features/category/presentation/bloc/catalog_bloc.dart';
 import 'package:xc/features/category/presentation/bloc/catalog_events.dart';
 import 'package:xc/features/category/presentation/bloc/catalog_state.dart';
 
+import '../services/hive/hive_service.dart';
+
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
   @override
@@ -37,6 +39,37 @@ class _MyAppBarState extends State<MyAppBar> {
         ),
       ),
       actions: [
+
+        BlocBuilder<CatalogBloc, CatalogState>(
+            bloc: catalogBloc,
+            builder: (context, catalogState) {
+              // return catalogState.historyCategories.isNotEmpty
+              //     ?
+             return InkWell(
+                  onTap: () {
+                    // String lastWord = catalogState.historyCategories.last;
+                    // int lastIndex = catalogState.historyCategories.length - 1;
+                    //
+                    // catalogBloc.add(ChangeHistory(lastWord, lastIndex));
+                    HiveService.changeBoxTime(false);
+
+                    catalogBloc.add(InitCatalog(context: context));
+                  },
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  child: const Button(
+                    text: '',
+                    icon: Icon(
+                      Icons.refresh,
+                      color: Colors.white,
+                    ),
+                  )
+              );
+                  // : const SizedBox();
+            }
+        ),
+        SizedBox(width: 15,),
         BlocBuilder<CatalogBloc, CatalogState>(
           bloc: catalogBloc,
           builder: (context, catalogState) {
@@ -62,6 +95,7 @@ class _MyAppBarState extends State<MyAppBar> {
               : const SizedBox();
           }
         ),
+
         const SizedBox(width: 15,)
       ],
     );
