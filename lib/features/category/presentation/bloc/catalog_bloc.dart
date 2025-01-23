@@ -158,7 +158,7 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
         
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           await setCatalog();
-          // await setProduct();
+          await setProduct();
 
           // обновились
           HiveService.changeBoxTime(true);
@@ -199,7 +199,7 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
         ));
 
         await setCatalog();
-        // await setProduct();
+        await setProduct();
 
         HiveService.changeBoxTime(true);
 
