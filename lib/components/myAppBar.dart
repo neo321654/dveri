@@ -75,7 +75,7 @@ class _MyAppBarState extends State<MyAppBar> {
                   // : const SizedBox();
             }
         ),
-        SizedBox(width: 15,),
+        SizedBox(width: 100,),
         BlocBuilder<CatalogBloc, CatalogState>(
           bloc: catalogBloc,
           builder: (context, catalogState) {
