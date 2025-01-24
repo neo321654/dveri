@@ -132,7 +132,7 @@ class CatalogBloc extends Bloc<CatalogEvents, CatalogState> {
             }
             print('end Product');
           }
-
+//
           print(receivedIdClorsDoor.length);
           print(receivedIDs.length);
 
