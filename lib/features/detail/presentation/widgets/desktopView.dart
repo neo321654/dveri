@@ -7,7 +7,11 @@ import 'package:xc/components/myAppBar.dart';
 import 'package:xc/components/history.dart';
 import 'package:xc/features/detail/presentation/bloc/detail_bloc.dart';
 import 'package:xc/features/detail/presentation/bloc/detail_state.dart';
-import 'package:xc/features/detail/presentation/widgets/dynamic%D0%A1olors.dart';
+
+import 'dynamicСolors.dart';
+
+// import 'dynamicСolors.dart';
+// import 'package:xc/features/detail/presentation/widgets/dynamic%D0%A1olors.dart';
 
 class DesktopView extends StatefulWidget {
 

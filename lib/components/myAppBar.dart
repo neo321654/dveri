@@ -5,6 +5,7 @@ import 'package:xc/features/category/presentation/bloc/catalog_bloc.dart';
 import 'package:xc/features/category/presentation/bloc/catalog_events.dart';
 import 'package:xc/features/category/presentation/bloc/catalog_state.dart';
 
+import '../config/router/router.dart';
 import '../services/hive/hive_service.dart';
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -53,7 +54,12 @@ class _MyAppBarState extends State<MyAppBar> {
                     // catalogBloc.add(ChangeHistory(lastWord, lastIndex));
                     HiveService.changeBoxTime(false);
 
+                    catalogBloc.add(ClearHistory());
+
+
                     catalogBloc.add(InitCatalog(context: context));
+                    router.go('/');
+
                   },
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
@@ -78,7 +84,8 @@ class _MyAppBarState extends State<MyAppBar> {
                   onTap: () {
                     String lastWord = catalogState.historyCategories.last;
                     int lastIndex = catalogState.historyCategories.length - 1;
-                  
+
+
                     catalogBloc.add(ChangeHistory(lastWord, lastIndex));
                   },
                   splashColor: Colors.transparent,
